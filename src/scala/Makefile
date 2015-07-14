@@ -1,6 +1,6 @@
-VERILOGDIR=../verilog
+VERILOGDIR=../verilog/generated
 
-all: RingRouter.v
+all: $(VERILOGDIR)/RingRouter.v
 
 RingDemuxTests:
 	sbt "run RingDemuxTests --genHarness --compile --test --vcd"
@@ -14,8 +14,9 @@ RingMuxRRTests:
 RingRouterTests:
 	sbt "run RingRouterTests --genHarness --compile --test --vcd"
 
-RingRouter.v: compile
+$(VERILOGDIR)/RingRouter.v: compile
 	sbt "run RingRouter --backend v"
+	mv RingRouter.v $(VERILOGDIR)/RingRouter.v
 
 compile:
 	sbt compile
