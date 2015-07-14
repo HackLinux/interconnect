@@ -87,6 +87,11 @@ class RingDemux(data_width: Int, id: UInt, dest_width: Int)
     // select the proper output for incoming packets and enter the
     // proper worm state.
     is(s_noworm) {
+      // Signal ready to the input from the correct input port (mux
+      // ready by destination)
+      io.in.ready := (in_out0 & io.out0.ready) |
+          (in_out1 & io.out1.ready)
+
       // Only if the input is valid
       when (io.in.valid) {
         // This must be a first flit
@@ -95,11 +100,6 @@ class RingDemux(data_width: Int, id: UInt, dest_width: Int)
         // Forward the valid signal to the proper output
         io.out0.valid := in_out0.toUInt()
         io.out1.valid := in_out1.toUInt()
-
-        // Signal ready to the input from the correct input port (mux
-        // ready by destination)
-        io.in.ready := (in_out0 & io.out0.ready) |
-          (in_out1 & io.out1.ready)
 
         // Only when this is not the last flit in the packet we need
         // to enter a worm state, otherwise the next flit will be the
