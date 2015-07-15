@@ -23,7 +23,7 @@ object Interconnect {
         }
       case "RingRouterTests" =>
         chiselMainTest(chiselargs,
-          () => Module(new RingRouter(16, UInt(0), 10))) {
+          () => Module(new RingRouter(UInt(0), 16, 10))) {
           c => new RingRouterTests(c)
         }
       case "RingRouter" =>
