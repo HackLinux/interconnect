@@ -23,13 +23,13 @@ object Interconnect {
         }
       case "RingRouterTests" =>
         chiselMainTest(chiselargs,
-          () => Module(new RingRouter(UInt(0), 16, 10))) {
+          () => Module(new RingRouter(UInt(0), 16, 10, 3))) {
           c => new RingRouterTests(c)
         }
       case "RingRouter" =>
         chiselMain(chiselargs,
           () => Module(new RingRouter(data_width = 16,
-            id = UInt(0), dest_width = 10)))
+            id = UInt(0), dest_width = 10, buffer_depth = 4)))
     }
   }
 }

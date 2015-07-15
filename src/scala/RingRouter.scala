@@ -27,7 +27,8 @@ class NetworkLink (data_width: Int)
  *           |      |
  *          out    in
  */
-class RingRouter (id: UInt, data_width: Int = 16, dest_width: Int = 10)
+class RingRouter (id: UInt, data_width: Int = 16, dest_width: Int = 10,
+  buffer_depth: Int = 4)
     extends Module {
   val flit_width = data_width + 2
 
