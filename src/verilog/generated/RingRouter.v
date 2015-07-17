@@ -97,6 +97,7 @@ module Queue(input clk, input reset,
 endmodule
 
 module RingDemux(input clk, input reset,
+    input [9:0] io_id,
     output io_in_ready,
     input  io_in_valid,
     input [17:0] io_in_bits,
@@ -114,7 +115,7 @@ module RingDemux(input clk, input reset,
   wire T3;
   wire in_out1;
   wire in_out0;
-  wire[10:0] in_dest;
+  wire[9:0] in_dest;
   wire T4;
   wire T5;
   reg [1:0] in_worm;
@@ -171,8 +172,8 @@ module RingDemux(input clk, input reset,
   assign T2 = T3;
   assign T3 = in_out1;
   assign in_out1 = in_out0 ^ 1'h1;
-  assign in_out0 = in_dest == 11'h0;
-  assign in_dest = io_in_bits[5'h10:3'h6];
+  assign in_out0 = in_dest == io_id;
+  assign in_dest = io_in_bits[4'hf:3'h6];
   assign T4 = T5 & io_in_valid;
   assign T5 = 2'h0 == in_worm;
   assign T37 = reset ? 2'h0 : nxt_in_worm;
@@ -544,6 +545,7 @@ module RingMux(input clk, input reset,
 endmodule
 
 module RingRouter(input clk, input reset,
+    input [9:0] io_id,
     output io_ring_in0_ready,
     input  io_ring_in0_valid,
     input [17:0] io_ring_in0_bits,
@@ -630,6 +632,7 @@ module RingRouter(input clk, input reset,
        //.io_count(  )
   );
   RingDemux in0_demux(.clk(clk), .reset(reset),
+       .io_id( io_id ),
        .io_in_ready( in0_demux_io_in_ready ),
        .io_in_valid( io_ring_in0_valid ),
        .io_in_bits( io_ring_in0_bits ),
@@ -641,6 +644,7 @@ module RingRouter(input clk, input reset,
        .io_out1_bits( in0_demux_io_out1_bits )
   );
   RingDemux in1_demux(.clk(clk), .reset(reset),
+       .io_id( io_id ),
        .io_in_ready( in1_demux_io_in_ready ),
        .io_in_valid( io_ring_in1_valid ),
        .io_in_bits( io_ring_in1_bits ),
