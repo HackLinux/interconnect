@@ -8,7 +8,7 @@ object Interconnect {
     args(0) match {
       case "RingDemuxTests" =>
         chiselMainTest(chiselargs,
-          () => Module(new RingDemux(16, UInt(0), 10))) {
+          () => Module(new RingDemux(16, 10))) {
           c => new RingDemuxTests(c)
         }
       case "RingMuxTests" =>
@@ -23,13 +23,14 @@ object Interconnect {
         }
       case "RingRouterTests" =>
         chiselMainTest(chiselargs,
-          () => Module(new RingRouter(UInt(0), 16, 10, 3))) {
+          () => Module(new RingRouter(data_width = 16, dest_width = 10,
+            buffer_depth = 3))) {
           c => new RingRouterTests(c)
         }
       case "RingRouter" =>
         chiselMain(chiselargs,
           () => Module(new RingRouter(data_width = 16,
-            id = UInt(0), dest_width = 10, buffer_depth = 4)))
+            dest_width = 10, buffer_depth = 4)))
     }
   }
 }

@@ -40,12 +40,13 @@ class NetworkLink (data_width: Int)
  *           |      |
  *          out    in
  */
-class RingRouter (id: UInt, data_width: Int = 16, dest_width: Int = 10,
-  buffer_depth: Int = 4)
-    extends Module {
+class RingRouter (data_width: Int = 16, dest_width: Int = 10,
+  buffer_depth: Int = 4) extends Module {
   val flit_width = data_width + 2
 
+
   val io = new Bundle {
+    val id = UInt(INPUT, dest_width)
     val ring_in0 = new NetworkLink(data_width).flip()
     val ring_in1 = new NetworkLink(data_width).flip()
     val ring_out0 = new NetworkLink(data_width)
@@ -58,8 +59,10 @@ class RingRouter (id: UInt, data_width: Int = 16, dest_width: Int = 10,
   val buffer_ring1 = Module(new Queue(Bits(width = flit_width), buffer_depth))
   val buffer_local = Module(new Queue(Bits(width = flit_width), buffer_depth))
 
-  val in0_demux = Module(new RingDemux(data_width, id, dest_width))
-  val in1_demux = Module(new RingDemux(data_width, id, dest_width))
+  val in0_demux = Module(new RingDemux(data_width, dest_width))
+  val in1_demux = Module(new RingDemux(data_width, dest_width))
+  in0_demux.io.id := io.id
+  in1_demux.io.id := io.id
 
   val local_mux = Module(new RingMuxRR(data_width))
   val out0_mux = Module(new RingMux(data_width))
@@ -88,6 +91,8 @@ class RingRouter (id: UInt, data_width: Int = 16, dest_width: Int = 10,
 }
 
 class RingRouterTests(c: RingRouter) extends Tester(c) {
+  // Set the id of this router
+  poke(c.io.id, 3)
   /* STEP 0 */
   // Check forwarding in ring 1
   poke(c.io.ring_in1.valid, 1)
@@ -269,9 +274,9 @@ class RingRouterTests(c: RingRouter) extends Tester(c) {
   /* STEP 14 */
   // Test local output
   poke(c.io.ring_in0.valid, 1)
-  poke(c.io.ring_in0.bits, 0x20000)
+  poke(c.io.ring_in0.bits, 0x200c0)
   poke(c.io.ring_in1.valid, 1)
-  poke(c.io.ring_in1.bits, 0x20001)
+  poke(c.io.ring_in1.bits, 0x200c1)
   poke(c.io.out.ready, 1)
   expect(c.io.ring_in0.ready, 1)
   expect(c.io.ring_in1.ready, 0)
@@ -283,13 +288,13 @@ class RingRouterTests(c: RingRouter) extends Tester(c) {
   poke(c.io.ring_in0.valid, 1)
   poke(c.io.ring_in0.bits, 0x3fff0)
   poke(c.io.ring_in1.valid, 1)
-  poke(c.io.ring_in1.bits, 0x20001)
+  poke(c.io.ring_in1.bits, 0x200c1)
   expect(c.io.ring_in0.ready, 1)
   expect(c.io.ring_in1.ready, 0)
   expect(c.io.ring_out1.valid, 0)
   expect(c.io.ring_out0.valid, 0)
   expect(c.io.out.valid, 1)
-  expect(c.io.out.bits, 0x20000)
+  expect(c.io.out.bits, 0x200c0)
   step(1)
   /* STEP 16 */
   poke(c.io.ring_in0.valid, 0)
@@ -307,7 +312,7 @@ class RingRouterTests(c: RingRouter) extends Tester(c) {
   expect(c.io.ring_out1.valid, 0)
   expect(c.io.ring_out0.valid, 0)
   expect(c.io.out.valid, 1)
-  expect(c.io.out.bits, 0x20001)
+  expect(c.io.out.bits, 0x200c1)
   step(1)
   /* STEP 18 */
   poke(c.io.ring_in1.valid, 0)

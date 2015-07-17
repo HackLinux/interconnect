@@ -38,11 +38,14 @@ import Chisel._
   * or port 1 otherwise.
   */
 
-class RingDemux(data_width: Int, id: UInt, dest_width: Int)
+class RingDemux(data_width: Int, dest_width: Int)
     extends Module {
+
+
   // One input and two output ports (decoupled I/O with data_width + 2
   // bits for the flit type)
   val io = new Bundle {
+    val id = UInt(INPUT, dest_width)
     val in = new NetworkLink(data_width).flip()
     val out0 = new NetworkLink(data_width)
     val out1 = new NetworkLink(data_width)
@@ -55,9 +58,9 @@ class RingDemux(data_width: Int, id: UInt, dest_width: Int)
   val in_is_last = in_type(0) === Bits(1)  // Last flit in packet
 
   // Destination is only a valid field iff in_is_first
-  val in_dest = io.in.bits(6 + dest_width, 6)
+  val in_dest : UInt = io.in.bits(5 + dest_width, 6)
   // Selection conditions for output ports
-  val in_out0 = in_dest === UInt(id)
+  val in_out0 = in_dest === UInt(io.id)
   val in_out1 = !in_out0
 
   /* State machine and output */
@@ -148,10 +151,12 @@ class RingDemux(data_width: Int, id: UInt, dest_width: Int)
 }
 
 class RingDemuxTests(c: RingDemux) extends Tester(c) {
+  // Set the id of this router
+  poke(c.io.id, 3)
   // Check combinational correctness in noworm state
   // Not output is ready, header flit for out0
   poke(c.io.in.valid, 1)
-  poke(c.io.in.bits, 0x20000)
+  poke(c.io.in.bits, 0x200c0)
   poke(c.io.out0.ready, 0)
   poke(c.io.out1.ready, 0)
   expect(c.io.out0.valid, 1)
