@@ -27,10 +27,19 @@ object Interconnect {
             buffer_depth = 3))) {
           c => new RingRouterTests(c)
         }
+      case "RingTests" =>
+        chiselMainTest(chiselargs,
+          () => Module(new Ring(num_ports = 4))) {
+          c => new RingTests(c)
+        }
       case "RingRouter" =>
         chiselMain(chiselargs,
           () => Module(new RingRouter(data_width = 16,
             dest_width = 10, buffer_depth = 4)))
+      case "Ring4" =>
+        chiselMain(chiselargs,
+          () => Module(new Ring(data_width = 16,
+            dest_width = 10, num_ports = 4)))
     }
   }
 }
